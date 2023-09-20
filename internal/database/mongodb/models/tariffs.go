@@ -17,3 +17,7 @@ type Tariff struct {
 }
 
 type Tariffs []*Tariff
+
+type TariffRequest struct {
+	ID string `json:"id" bson:"_id"`
+}

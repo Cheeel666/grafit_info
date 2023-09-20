@@ -9,6 +9,7 @@ type MongoDBConfig struct {
 	Database string
 	Username string
 	Password string
+	Timeout  int
 }
 
 // WebServer - config for web server.
@@ -49,6 +50,8 @@ func (c *Config) initDefault() {
 
 	viper.SetDefault("server.host", "localhost")
 	viper.SetDefault("server.port", 8080)
+
+	viper.SetDefault("mobgodb.timeout", 5)
 }
 
 func (c *Config) initFileCfg() {

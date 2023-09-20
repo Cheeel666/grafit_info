@@ -5,9 +5,11 @@ import (
 	"go.uber.org/zap"
 	"projects/grafit_info/config"
 	mongodb "projects/grafit_info/internal/database/mongodb"
+	"projects/grafit_info/internal/database/mongodb/repository"
 	"projects/grafit_info/internal/service"
 )
 
+// Server is a struct that contains all server dependencies.
 type Server struct {
 	mongo mongodb.Client
 	log   *zap.Logger
@@ -17,9 +19,12 @@ type Server struct {
 	tariff     *service.TariffService
 }
 
+// NewServer creates new server instance.
 func NewServer(cfg *config.Config, log *zap.Logger, mongoClient *mongodb.Client) *Server {
+	tariffRepository := repository.NewTariffRepository(cfg, mongoClient)
+
 	commonInfo := service.NewCommonInfoService(log, mongoClient)
-	tariffService := service.NewTariffService(log, mongoClient)
+	tariffService := service.NewTariffService(log, cfg, tariffRepository)
 
 	var s = &Server{
 		mongo: *mongoClient,
@@ -35,7 +40,14 @@ func NewServer(cfg *config.Config, log *zap.Logger, mongoClient *mongodb.Client)
 	return s
 }
 
+// initHandlers initializes handlers for server and use CORS middleware.
 func (s *Server) initHandlers() {
+	s.app.Use(
+		CORSMiddleware(),
+		gin.Logger(),
+		gin.Recovery(),
+	)
+
 	tariffs := s.app.Group("/tariffs")
 	{
 		tariffs.GET("/", s.tariff.Get)
@@ -74,4 +86,21 @@ func (s *Server) initHandlers() {
 
 func (s *Server) Run() error {
 	return s.app.Run()
+}
+
+// CORSMiddleware for logging
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, DELETE, GET, PUT, PATCH")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }
