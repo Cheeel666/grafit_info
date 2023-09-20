@@ -44,6 +44,7 @@ func (c *Config) initDefault() {
 	viper.SetDefault("mongodb.database", "grafit")
 	viper.SetDefault("mongodb.username", "")
 	viper.SetDefault("mongodb.password", "")
+	viper.SetDefault("mongodb.timeout", 5)
 
 	viper.SetDefault("env", "dev")
 	viper.SetDefault("appName", "go-auth")
@@ -51,7 +52,6 @@ func (c *Config) initDefault() {
 	viper.SetDefault("server.host", "localhost")
 	viper.SetDefault("server.port", 8080)
 
-	viper.SetDefault("mobgodb.timeout", 5)
 }
 
 func (c *Config) initFileCfg() {
