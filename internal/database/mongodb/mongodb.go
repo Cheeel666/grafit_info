@@ -14,36 +14,47 @@ import (
 type Client struct {
 	cfg    *config.Config
 	log    *zap.Logger
-	client *mongo.Client
+	Client *mongo.Client
 }
 
 func NewMongoDB(cfg *config.Config, log *zap.Logger) *Client {
 	return &Client{
 		cfg:    cfg,
 		log:    log,
-		client: nil,
+		Client: nil,
 	}
 }
 
 func (m *Client) Connect() error {
 	var err error
+
 	uri := fmt.Sprintf(
-		"mongodb://%s:%s@%s:%d/%s?authSource=admin",
-		m.cfg.MongoDB.Username,
-		m.cfg.MongoDB.Password,
+		"mongodb://%s:%d/%s?authSource=admin",
 		m.cfg.MongoDB.Host,
 		m.cfg.MongoDB.Port,
 		m.cfg.MongoDB.Database,
 	)
 
+	if len(m.cfg.MongoDB.Username) > 0 && len(m.cfg.MongoDB.Password) > 0 {
+		uri = fmt.Sprintf(
+			"mongodb://%s:%s@%s:%d/%s?authSource=admin",
+			m.cfg.MongoDB.Username,
+			m.cfg.MongoDB.Password,
+			m.cfg.MongoDB.Host,
+			m.cfg.MongoDB.Port,
+			m.cfg.MongoDB.Database,
+		)
+
+	}
+
 	opts := options.Client().ApplyURI(uri)
-	m.client, err = mongo.Connect(context.TODO(), opts)
+	m.Client, err = mongo.Connect(context.TODO(), opts)
 	if err != nil {
 		return err
 	}
 
 	var result bson.M
-	if err := m.client.Database("admin").RunCommand(context.TODO(), bson.M{"ping": 1}).Decode(&result); err != nil {
+	if err := m.Client.Database("grafit").RunCommand(context.TODO(), bson.M{"ping": 1}).Decode(&result); err != nil {
 		return err
 	}
 
@@ -51,7 +62,7 @@ func (m *Client) Connect() error {
 }
 
 func (m *Client) Release() {
-	if m.client != nil {
-		m.client.Disconnect(context.TODO())
+	if m.Client != nil {
+		m.Client.Disconnect(context.TODO())
 	}
 }

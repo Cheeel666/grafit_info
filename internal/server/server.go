@@ -17,9 +17,7 @@ type Server struct {
 	tariff     *service.TariffService
 }
 
-func NewServer(cfg *config.Config, log *zap.Logger) *Server {
-	mongoClient := mongodb.NewMongoDB(cfg, log)
-
+func NewServer(cfg *config.Config, log *zap.Logger, mongoClient *mongodb.Client) *Server {
 	commonInfo := service.NewCommonInfoService(log, mongoClient)
 	tariffService := service.NewTariffService(log, mongoClient)
 

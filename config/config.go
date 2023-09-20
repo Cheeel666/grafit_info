@@ -40,7 +40,7 @@ func InitConfig() *Config {
 func (c *Config) initDefault() {
 	viper.SetDefault("mongodb.host", "localhost")
 	viper.SetDefault("mongodb.port", 27017)
-	viper.SetDefault("mongodb.database", "go-auth")
+	viper.SetDefault("mongodb.database", "grafit")
 	viper.SetDefault("mongodb.username", "")
 	viper.SetDefault("mongodb.password", "")
 

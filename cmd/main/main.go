@@ -28,7 +28,7 @@ func main() {
 	defer mongoClient.Release()
 
 	// Init web server.
-	ws := server.NewServer(cfg, log)
+	ws := server.NewServer(cfg, log, mongoClient)
 	go ws.Run()
 
 	// Wait for interrupt signal to gracefully shutdown the server with.
