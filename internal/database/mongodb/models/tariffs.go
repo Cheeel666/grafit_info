@@ -4,7 +4,6 @@ import "time"
 
 // Tariff - тарифы и вся инфа по ним.
 type Tariff struct {
-	ID          string    `json:"id" bson:"_id"`
 	CreatedAt   int64     `json:"created_at" bson:"created_at"`
 	UpdatedAt   int64     `json:"updated_at" bson:"updated_at"`
 	Name        string    `json:"name" bson:"name"`
@@ -17,3 +16,7 @@ type Tariff struct {
 }
 
 type Tariffs []*Tariff
+
+type TariffRequest struct {
+	ID string `json:"id" bson:"_id"`
+}

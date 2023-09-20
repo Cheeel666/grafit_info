@@ -9,6 +9,7 @@ type MongoDBConfig struct {
 	Database string
 	Username string
 	Password string
+	Timeout  int
 }
 
 // WebServer - config for web server.
@@ -43,12 +44,14 @@ func (c *Config) initDefault() {
 	viper.SetDefault("mongodb.database", "grafit")
 	viper.SetDefault("mongodb.username", "")
 	viper.SetDefault("mongodb.password", "")
+	viper.SetDefault("mongodb.timeout", 5)
 
 	viper.SetDefault("env", "dev")
 	viper.SetDefault("appName", "go-auth")
 
 	viper.SetDefault("server.host", "localhost")
 	viper.SetDefault("server.port", 8080)
+
 }
 
 func (c *Config) initFileCfg() {

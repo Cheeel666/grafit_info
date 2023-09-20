@@ -1,68 +1,77 @@
 package service
 
 import (
-	"context"
+	"encoding/json"
+	"io"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
-	"projects/grafit_info/internal/database/mongodb"
+	"projects/grafit_info/config"
 	"projects/grafit_info/internal/database/mongodb/models"
+	"projects/grafit_info/internal/database/mongodb/repository"
 )
 
 type TariffService struct {
-	log         *zap.Logger
-	mongoClient *mongodb.Client
+	log        *zap.Logger
+	TariffRepo *repository.TariffRepo
+	cfg        *config.Config
 }
 
-func NewTariffService(log *zap.Logger, mongo *mongodb.Client) *TariffService {
+func NewTariffService(log *zap.Logger, cfg *config.Config, repo *repository.TariffRepo) *TariffService {
 	return &TariffService{
-		log:         log,
-		mongoClient: mongo,
+		log:        log,
+		TariffRepo: repo,
+		cfg:        cfg,
 	}
 }
 
 func (s *TariffService) Get(ctx *gin.Context) {
-	var tariffs models.Tariffs
-
-	collection := s.mongoClient.Client.Database("grafit").Collection("tariffs", nil)
-	filter := bson.D{}
-
-	// TODO: time to config
-	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelFunc()
-	cur, err := collection.Find(timeoutCtx, filter)
-	if cur == nil {
-		s.log.Error("Cursor is nil", zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
+	tariffs, err := s.TariffRepo.Find()
 	if err != nil {
-		s.log.Error("Failed to get tariffs", zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, gin.H{})
+		s.log.Error("GetTariffs", zap.String("err", err.Error()))
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	// TODO: time to config
-	timeoutCtx, cancelFunc = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelFunc()
-	if err := cur.All(timeoutCtx, &tariffs); err != nil {
-		s.log.Error("Failed to decode tariffs", zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, gin.H{})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, tariffs)
+	ctx.JSON(200, tariffs)
 }
 
 func (s *TariffService) GetByID(ctx *gin.Context) {
+	tariff, err := s.TariffRepo.FindByID(&models.TariffRequest{
+		ID: ctx.Param("id"),
+	})
+	if err != nil {
+		s.log.Error("GetTariff", zap.Error(err))
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(200, tariff)
 
 }
 
 func (s *TariffService) Create(ctx *gin.Context) {
+	var tariff *models.Tariff
+	jsonData, err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
+	err = json.Unmarshal(jsonData, &tariff)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = s.TariffRepo.Create(tariff)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Tariff created successfully!"})
 }
 
 func (s *TariffService) Update(ctx *gin.Context) {
