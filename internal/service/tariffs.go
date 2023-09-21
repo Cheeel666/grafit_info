@@ -75,9 +75,54 @@ func (s *TariffService) Create(ctx *gin.Context) {
 }
 
 func (s *TariffService) Update(ctx *gin.Context) {
+	id := ctx.Param("id")
 
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id is empty"})
+		return
+	}
+
+	var tariff *models.Tariff
+	jsonData, err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = json.Unmarshal(jsonData, &tariff)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = s.TariffRepo.Update(models.TariffRequest{
+		ID: id,
+	},
+		tariff,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Tariff updated successfully!"})
 }
 
 func (s *TariffService) Delete(ctx *gin.Context) {
+	id := ctx.Param("id")
 
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id is empty"})
+		return
+	}
+
+	err := s.TariffRepo.Delete(models.TariffRequest{
+		ID: id,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Tariff deleted successfully!"})
 }
