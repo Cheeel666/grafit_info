@@ -1,12 +1,13 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"projects/grafit_info/config"
 	mongodb "projects/grafit_info/internal/database/mongodb"
 	"projects/grafit_info/internal/database/mongodb/repository"
 	"projects/grafit_info/internal/service"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // Server is a struct that contains all server dependencies.
@@ -23,8 +24,9 @@ type Server struct {
 func NewServer(cfg *config.Config, log *zap.Logger, mongoClient *mongodb.Client) *Server {
 	tariffRepository := repository.NewTariffRepository(cfg, mongoClient)
 	commonInfoRepository := repository.NewCommonInfoRepo(cfg, mongoClient)
+	documentDictRepo := repository.NewDocumentDictRepo(cfg, mongoClient)
 
-	commonInfo := service.NewCommonInfoService(log, commonInfoRepository)
+	commonInfo := service.NewCommonInfoService(log, commonInfoRepository, documentDictRepo)
 	tariffService := service.NewTariffService(log, cfg, tariffRepository)
 
 	var s = &Server{
@@ -58,12 +60,13 @@ func (s *Server) initHandlers() {
 		tariffs.DELETE("/:id", s.tariff.Delete)
 	}
 
-	commonInfo := s.app.Group("/common_info")
+	commonInfo := s.app.Group("/common")
 	{
 		commonInfo.GET("/", s.commonInfo.Get)
-		commonInfo.POST("/", s.commonInfo.Create)
-		commonInfo.PUT("/:id", s.commonInfo.Update)
-		commonInfo.DELETE("/:id", s.commonInfo.Delete)
+		commonInfo.GET("/document-by-type", s.commonInfo.GetByType)
+		// commonInfo.POST("/", s.commonInfo.Create)
+		// commonInfo.PUT("/:id", s.commonInfo.Update)
+		// commonInfo.DELETE("/:id", s.commonInfo.Delete)
 	}
 
 	//pages := s.app.Group("/pages")
