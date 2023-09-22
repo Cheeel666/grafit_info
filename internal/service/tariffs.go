@@ -38,7 +38,7 @@ func (s *TariffService) Get(ctx *gin.Context) {
 }
 
 func (s *TariffService) GetByID(ctx *gin.Context) {
-	tariff, err := s.TariffRepo.FindByID(&models.TariffRequest{
+	tariff, err := s.TariffRepo.FindByID(&models.FindByIdReq{
 		ID: ctx.Param("id"),
 	})
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *TariffService) Update(ctx *gin.Context) {
 		return
 	}
 
-	err = s.TariffRepo.Update(models.TariffRequest{
+	err = s.TariffRepo.Update(models.FindByIdReq{
 		ID: id,
 	},
 		tariff,
@@ -116,7 +116,7 @@ func (s *TariffService) Delete(ctx *gin.Context) {
 		return
 	}
 
-	err := s.TariffRepo.Delete(models.TariffRequest{
+	err := s.TariffRepo.Delete(models.FindByIdReq{
 		ID: id,
 	})
 	if err != nil {

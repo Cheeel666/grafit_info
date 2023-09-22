@@ -17,6 +17,7 @@ type Tariff struct {
 
 type Tariffs []*Tariff
 
-type TariffRequest struct {
-	ID string `json:"id" bson:"_id"`
+type FindReq struct {
+	ID   string `json:"id" bson:"_id"`
+	Type int    `json:"type" bson:"type"`
 }

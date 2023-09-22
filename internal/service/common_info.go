@@ -6,6 +6,7 @@ import (
 	"projects/grafit_info/internal/database/mongodb"
 )
 
+// CommonInfoService - service for work with common info such as headers, links, offers, etc.
 type CommonInfoService struct {
 	log         *zap.Logger
 	mongoClient *mongodb.Client
