@@ -3,19 +3,19 @@ package service
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"projects/grafit_info/internal/database/mongodb"
+	"projects/grafit_info/internal/database/mongodb/repository"
 )
 
 // CommonInfoService - service for work with common info such as headers, links, offers, etc.
 type CommonInfoService struct {
-	log         *zap.Logger
-	mongoClient *mongodb.Client
+	log            *zap.Logger
+	CommonInfoRepo repository.CommonInfo
 }
 
-func NewCommonInfoService(log *zap.Logger, mongo *mongodb.Client) *CommonInfoService {
+func NewCommonInfoService(log *zap.Logger, repo repository.CommonInfo) *CommonInfoService {
 	return &CommonInfoService{
-		log:         log,
-		mongoClient: mongo,
+		log:            log,
+		CommonInfoRepo: repo,
 	}
 }
 

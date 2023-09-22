@@ -22,8 +22,9 @@ type Server struct {
 // NewServer creates new server instance.
 func NewServer(cfg *config.Config, log *zap.Logger, mongoClient *mongodb.Client) *Server {
 	tariffRepository := repository.NewTariffRepository(cfg, mongoClient)
+	commonInfoRepository := repository.NewCommonInfoRepo(cfg, mongoClient)
 
-	commonInfo := service.NewCommonInfoService(log, mongoClient)
+	commonInfo := service.NewCommonInfoService(log, commonInfoRepository)
 	tariffService := service.NewTariffService(log, cfg, tariffRepository)
 
 	var s = &Server{

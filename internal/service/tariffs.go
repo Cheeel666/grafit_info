@@ -14,11 +14,11 @@ import (
 
 type TariffService struct {
 	log        *zap.Logger
-	TariffRepo *repository.TariffRepo
+	TariffRepo repository.Tariff
 	cfg        *config.Config
 }
 
-func NewTariffService(log *zap.Logger, cfg *config.Config, repo *repository.TariffRepo) *TariffService {
+func NewTariffService(log *zap.Logger, cfg *config.Config, repo repository.Tariff) *TariffService {
 	return &TariffService{
 		log:        log,
 		TariffRepo: repo,
@@ -38,7 +38,7 @@ func (s *TariffService) Get(ctx *gin.Context) {
 }
 
 func (s *TariffService) GetByID(ctx *gin.Context) {
-	tariff, err := s.TariffRepo.FindByID(&models.FindByIdReq{
+	tariff, err := s.TariffRepo.FindByID(&models.FindReq{
 		ID: ctx.Param("id"),
 	})
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *TariffService) Update(ctx *gin.Context) {
 		return
 	}
 
-	err = s.TariffRepo.Update(models.FindByIdReq{
+	err = s.TariffRepo.Update(models.FindReq{
 		ID: id,
 	},
 		tariff,
@@ -116,7 +116,7 @@ func (s *TariffService) Delete(ctx *gin.Context) {
 		return
 	}
 
-	err := s.TariffRepo.Delete(models.FindByIdReq{
+	err := s.TariffRepo.Delete(models.FindReq{
 		ID: id,
 	})
 	if err != nil {

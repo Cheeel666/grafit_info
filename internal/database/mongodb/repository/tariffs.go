@@ -16,14 +16,22 @@ type TariffRepo struct {
 	cfg         *config.Config
 }
 
-func NewTariffRepository(cfg *config.Config, mongoClient *mongodb.Client) *TariffRepo {
+type Tariff interface {
+	Find() (models.Tariffs, error)
+	FindByID(req *models.FindReq) (*models.Tariff, error)
+	Delete(req models.FindReq) error
+	Update(models.FindReq, *models.Tariff) error
+	Create(*models.Tariff) error
+}
+
+func NewTariffRepository(cfg *config.Config, mongoClient *mongodb.Client) Tariff {
 	return &TariffRepo{
 		mongoClient: mongoClient,
 		cfg:         cfg,
 	}
 }
 
-func (t TariffRepo) Find() (models.Tariffs, error) {
+func (t *TariffRepo) Find() (models.Tariffs, error) {
 	var tariffs models.Tariffs
 	timeout := time.Duration(t.cfg.MongoDB.Timeout)
 
@@ -49,7 +57,7 @@ func (t TariffRepo) Find() (models.Tariffs, error) {
 	return tariffs, nil
 }
 
-func (t TariffRepo) FindByID(req *models.FindReq) (*models.Tariff, error) {
+func (t *TariffRepo) FindByID(req *models.FindReq) (*models.Tariff, error) {
 	var tariff *models.Tariff
 	timeout := time.Duration(t.cfg.MongoDB.Timeout)
 
@@ -68,7 +76,7 @@ func (t TariffRepo) FindByID(req *models.FindReq) (*models.Tariff, error) {
 	return tariff, nil
 }
 
-func (t TariffRepo) Update(req models.FindReq, newTariff *models.Tariff) error {
+func (t *TariffRepo) Update(req models.FindReq, newTariff *models.Tariff) error {
 	timeout := time.Duration(t.cfg.MongoDB.Timeout)
 
 	collection := t.mongoClient.Client.Database("grafit").Collection("tariffs", nil)
@@ -89,7 +97,7 @@ func (t TariffRepo) Update(req models.FindReq, newTariff *models.Tariff) error {
 	return nil
 }
 
-func (t TariffRepo) Delete(req models.FindReq) error {
+func (t *TariffRepo) Delete(req models.FindReq) error {
 	timeout := time.Duration(t.cfg.MongoDB.Timeout)
 
 	collection := t.mongoClient.Client.Database("grafit").Collection("tariffs", nil)
@@ -110,7 +118,7 @@ func (t TariffRepo) Delete(req models.FindReq) error {
 	return nil
 }
 
-func (t TariffRepo) Create(tariff *models.Tariff) error {
+func (t *TariffRepo) Create(tariff *models.Tariff) error {
 	timeout := time.Duration(t.cfg.MongoDB.Timeout)
 
 	collection := t.mongoClient.Client.Database("grafit").Collection("tariffs", nil)
